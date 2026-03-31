@@ -1,0 +1,53 @@
+# Node modules (the usual 200MB mistake)
+node_modules/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Environment variables (DO NOT PUSH THIS)
+.env
+
+# OS junk (Windows being Windows)
+.DS_Store
+Thumbs.db
+
+# VS Code settings
+.vscode/
+
+# Build / dist
+dist/
+build/
+
+# Uploads (VERY IMPORTANT for your project)
+uploads/
+
+# Temporary files
+tmp/
+temp/
+
+# Prisma
+prisma/migrations/
+*.db
+
+# Redis dump (if any)
+dump.rdb
+
+# Coverage
+coverage/
+
+# Misc
+*.tgz
+*.zip
+*.mp4
+# FFmpeg binaries (if you ever accidentally include them)
+ffmpeg/

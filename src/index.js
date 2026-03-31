@@ -1,0 +1,61 @@
+const express = require('express');
+const cors = require('cors');
+const morgan = require('morgan');
+const rateLimit = require('express-rate-limit');
+const path = require('path');
+const dotenv = require('dotenv');
+const logger = require('./utils/logger');
+const errorHandler = require('./middleware/errorMiddleware');
+const jobRoutes = require('./routes/jobRoutes');
+const { redisClient } = require('./config/redisConfig');
+
+// Load environment variables
+dotenv.config();
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Basic Rate Limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: { success: false, message: 'Too many requests, please try again later.' },
+});
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(morgan('combined', { stream: { write: (message) => logger.info(message.trim()) } }));
+app.use(limiter);
+
+// Health Check
+app.get('/api/health', async (req, res) => {
+  let redisStatus = 'disconnected';
+  try {
+    const ping = await redisClient.ping();
+    if (ping === 'PONG') redisStatus = 'connected';
+  } catch (err) {
+    logger.error(`Redis Health Check Failed: ${err.message}`);
+  }
+
+  res.status(200).json({
+    status: 'UP',
+    server: 'online',
+    redis: redisStatus,
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// Routes
+app.use('/api', jobRoutes);
+
+// Error Handler
+app.use(errorHandler);
+
+// Start Server
+app.listen(PORT, () => {
+  logger.info(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+});
+
+module.exports = app;
