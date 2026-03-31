@@ -1,21 +1,32 @@
-const dotenv = require('dotenv');
+require('dotenv').config();
+const { Worker } = require('bullmq');
+const { redisConfig } = require('./config/redisConfig');
+const videoProcessor = require('./workers/videoWorker');
 const logger = require('./utils/logger');
-const videoWorker = require('./workers/videoWorker');
 
-// Load environment variables
-dotenv.config();
+// Create worker
+const worker = new Worker(
+  'video-processing',
+  async (job) => {
+    logger.info(`Processing job ${job.id}`);
+    return await videoProcessor(job);
+  },
+  redisConfig
+);
 
-logger.info('Video Processing Worker process started');
-
-// Handle process termination
-process.on('SIGINT', async () => {
-  logger.info('Shutting down worker...');
-  await videoWorker.close();
-  process.exit(0);
+// Logs
+worker.on('completed', (job) => {
+  logger.info(`Job ${job.id} completed`);
 });
 
-process.on('SIGTERM', async () => {
-  logger.info('Shutting down worker...');
-  await videoWorker.close();
-  process.exit(0);
+worker.on('failed', (job, err) => {
+  logger.error(`Job ${job?.id} failed: ${err.message}`);
 });
+
+worker.on('error', (err) => {
+  logger.error(`Worker error: ${err.message}`);
+});
+
+logger.info('Worker started inside backend');
+
+module.exports = worker;

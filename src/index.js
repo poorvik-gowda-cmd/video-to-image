@@ -59,3 +59,8 @@ app.listen(PORT, () => {
 });
 
 module.exports = app;
+
+// 🔥 Start worker inside backend (Render free tier workaround)
+if (process.env.NODE_ENV !== 'test') {
+  require('./worker');
+}
