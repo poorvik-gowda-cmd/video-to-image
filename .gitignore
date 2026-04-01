@@ -36,7 +36,6 @@ tmp/
 temp/
 
 # Prisma
-prisma/migrations/
 *.db
 
 # Redis dump (if any)
