@@ -1,37 +1,27 @@
+// config/redisConfig.js
 const Redis = require('ioredis');
 require('dotenv').config();
 
-// If REDIS_URL exists → use cloud (Render / Upstash)
-// Otherwise → fallback to local Redis
-const redisConfig = process.env.REDIS_URL
-  ? {
-      connection: {
-        url: process.env.REDIS_URL,
-      },
-    }
-  : {
-      connection: {
-        host: process.env.REDIS_HOST || '127.0.0.1',
-        port: parseInt(process.env.REDIS_PORT) || 6379,
-        password: process.env.REDIS_PASSWORD || undefined,
-      },
-    };
+let redisClient;
 
-// Create client (for direct Redis usage if needed)
-const redisClient = new Redis(
-  process.env.REDIS_URL
-    ? process.env.REDIS_URL
-    : {
-        host: process.env.REDIS_HOST || '127.0.0.1',
-        port: parseInt(process.env.REDIS_PORT) || 6379,
-        password: process.env.REDIS_PASSWORD || undefined,
-      }
-);
+if (process.env.REDIS_URL) {
+  // Use cloud Redis (Upstash) with TLS
+  redisClient = new Redis(process.env.REDIS_URL, {
+    tls: {},                // Required for Upstash
+    maxRetriesPerRequest: null, // Needed for BullMQ stability
+  });
+} else {
+  // Fallback to local Redis if running locally
+  redisClient = new Redis({
+    host: process.env.REDIS_HOST || '127.0.0.1',
+    port: parseInt(process.env.REDIS_PORT) || 6379,
+    password: process.env.REDIS_PASSWORD || undefined,
+    maxRetriesPerRequest: null,
+  });
+}
 
-// Important for BullMQ stability
-redisClient.options.maxRetriesPerRequest = null;
+redisClient.on('connect', () => console.log('Redis connected'));
+redisClient.on('error', (err) => console.error('Redis error:', err));
 
-module.exports = {
-  redisClient,
-  redisConfig,
-};
+module.exports = { redisClient };
+
