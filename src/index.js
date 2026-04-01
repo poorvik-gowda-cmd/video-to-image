@@ -43,6 +43,7 @@ app.get('/api/health', async (req, res) => {
     status: 'UP',
     server: 'online',
     redis: redisStatus,
+    tlsEnabled: !!process.env.REDIS_URL?.startsWith('rediss://'),
     timestamp: new Date().toISOString(),
   });
 });

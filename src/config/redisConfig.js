@@ -5,11 +5,11 @@ require('dotenv').config();
 let redisClient;
 
 if (process.env.REDIS_URL) {
-  // Use cloud Redis (Upstash) with TLS
-  redisClient = new Redis(process.env.REDIS_URL, {
-    tls: {},                // Required for Upstash
-    maxRetriesPerRequest: null, // Needed for BullMQ stability
-  });
+  const options = { maxRetriesPerRequest: null }; // Needed for BullMQ stability
+  if (process.env.REDIS_URL.startsWith('rediss://')) {
+    options.tls = { rejectUnauthorized: false };
+  }
+  redisClient = new Redis(process.env.REDIS_URL, options);
 } else {
   // Fallback to local Redis if running locally
   redisClient = new Redis({

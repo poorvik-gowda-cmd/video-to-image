@@ -1,5 +1,5 @@
 const { Worker } = require('bullmq');
-const { redisConfig } = require('../config/redisConfig');
+const { redisClient } = require('../config/redisConfig');
 const jobService = require('../services/jobService');
 const ffmpeg = require('fluent-ffmpeg');
 const path = require('path');
@@ -78,7 +78,7 @@ const videoWorker = new Worker(
       throw error;
     }
   },
-  { connection: redisConfig, concurrency: 1 }
+  { connection: redisClient, concurrency: 1 }
 );
 
 videoWorker.on('completed', (job) => {

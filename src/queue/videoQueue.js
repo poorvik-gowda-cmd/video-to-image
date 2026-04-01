@@ -1,9 +1,9 @@
 const { Queue } = require('bullmq');
-const { redisConfig } = require('../config/redisConfig');
+const { redisClient } = require('../config/redisConfig');
 const logger = require('../utils/logger');
 
 const videoQueue = new Queue('video-processing', {
-  connection: redisConfig,
+  connection: redisClient,
   defaultJobOptions: {
     attempts: 3,
     backoff: {
