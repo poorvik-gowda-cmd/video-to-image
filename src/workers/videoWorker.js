@@ -2,6 +2,8 @@ const { Worker } = require('bullmq');
 const { redisClient } = require('../config/redisConfig');
 const jobService = require('../services/jobService');
 const ffmpeg = require('fluent-ffmpeg');
+const ffmpegInstaller = require('@ffmpeg-installer/ffmpeg');
+ffmpeg.setFfmpegPath(ffmpegInstaller.path);
 const path = require('path');
 const fs = require('fs');
 const archiver = require('archiver');

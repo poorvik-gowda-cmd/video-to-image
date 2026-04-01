@@ -49,6 +49,8 @@ app.get('/api/health', async (req, res) => {
 });
 
 // Routes
+app.get('/', (req, res) => res.json({ success: true, message: 'Video Processing API is running' }));
+app.get('/api', (req, res) => res.json({ success: true, message: 'Video Processing API is running' }));
 app.use('/api', jobRoutes);
 
 // Error Handler
