@@ -1,27 +1,33 @@
-// config/redisConfig.js
 const Redis = require('ioredis');
-require('dotenv').config();
+const logger = require('../utils/logger');
 
 let redisClient;
 
+const redisOptions = {
+
+  maxRetriesPerRequest: null,
+  enableReadyCheck: false, // Recommended for BullMQ
+};
+
 if (process.env.REDIS_URL) {
-  const options = { maxRetriesPerRequest: null }; // Needed for BullMQ stability
+  // Production / Upstash
   if (process.env.REDIS_URL.startsWith('rediss://')) {
-    options.tls = { rejectUnauthorized: false };
+    redisOptions.tls = { rejectUnauthorized: false };
   }
-  redisClient = new Redis(process.env.REDIS_URL, options);
+  redisClient = new Redis(process.env.REDIS_URL, redisOptions);
 } else {
-  // Fallback to local Redis if running locally
+  // Local Development
   redisClient = new Redis({
     host: process.env.REDIS_HOST || '127.0.0.1',
     port: parseInt(process.env.REDIS_PORT) || 6379,
     password: process.env.REDIS_PASSWORD || undefined,
-    maxRetriesPerRequest: null,
+    ...redisOptions,
   });
 }
 
-redisClient.on('connect', () => console.log('Redis connected'));
-redisClient.on('error', (err) => console.error('Redis error:', err));
+redisClient.on('connect', () => logger.info('✅ Redis connected successfully'));
+redisClient.on('error', (err) => logger.error(`❌ Redis connection error: ${err.message}`));
+
 
 module.exports = { redisClient };
 

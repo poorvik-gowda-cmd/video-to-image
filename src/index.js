@@ -1,16 +1,16 @@
+const dotenv = require('dotenv');
+// Load environment variables immediately
+dotenv.config();
+
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
-const dotenv = require('dotenv');
 const logger = require('./utils/logger');
 const errorHandler = require('./middleware/errorMiddleware');
 const jobRoutes = require('./routes/jobRoutes');
 const { redisClient } = require('./config/redisConfig');
-
-// Load environment variables
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
